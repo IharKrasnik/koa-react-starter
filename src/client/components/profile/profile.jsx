@@ -9,7 +9,10 @@ import Button, {
 import Form, { Row, Column } from 'components/common/form';
 
 import * as fromUser from 'resources/user/user.selectors';
-import { updateUser } from 'resources/user/user.actions';
+import {
+  updateUser,
+  validateUserField,
+} from 'resources/user/user.actions';
 
 import styles from './profile.styles';
 
@@ -19,7 +22,9 @@ class Profile extends React.Component {
     user: PropTypes.shape({
       username: PropTypes.string,
       info: PropTypes.string,
+      errors: PropTypes.object,
     }).isRequired,
+    validateField: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -54,6 +59,14 @@ class Profile extends React.Component {
     this.props.updateUser(this.state);
   }
 
+  validateField = (field) => {
+    this.props.validateField(this.state, field);
+  }
+
+  error(field) {
+    return this.props.user.errors[field];
+  }
+
   render() {
     return (
       <div>
@@ -63,15 +76,19 @@ class Profile extends React.Component {
           <Row>
             <Column>
               <Input
+                errors={this.error('username')}
                 value={this.state.username}
                 onChange={this.onUsernameChange}
+                onBlur={this.validateField('username')}
               />
             </Column>
 
             <Column>
               <Input
+                errors={this.error('info')}
                 value={this.state.info}
                 onChange={this.onInfoChange}
+                onBlur={this.validateField('info')}
               />
             </Column>
           </Row>
@@ -105,4 +122,5 @@ export default connect(state => ({
   user: fromUser.getUser(state),
 }), {
   updateUser,
+  validateField: validateUserField,
 })(Profile);
